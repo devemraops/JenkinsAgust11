@@ -5,11 +5,11 @@ pipeline {
         maven 'mvn3'
     }
     stages {
-        stage('Cleanup Workspace') {
-            steps {
-                checkout scm()
-            }
-        }
+        // stage('Cleanup Workspace') {
+        //     steps {
+        //         checkout scm()
+        //     }
+        // }
         stage('Build App') {
             steps {
                 script {
