@@ -12,16 +12,12 @@ pipeline {
         // }
         stage('Build App') {
             steps {
-                script {
-                    sh "mvn clean package"
-                }
+                sh "mvn clean package"
             }
         }
         stage("Test Application") {
             steps {
-                script {
-                    sh "mvn test package"
-                }
+                sh "mvn test package"
             }
         }
         stage('Cleanup Workspace') {
