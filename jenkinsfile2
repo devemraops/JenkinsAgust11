@@ -10,7 +10,7 @@ pipeline {
         choice(name: 'BUILD_TOOL', choices: ['MAVEN', 'GRADLE', 'NPM'], description: 'Select the build tool for the application')
     }
     stages {
-        stage('Checkout Source') {
+        stage("Checkout Source") {
             steps {
                 script {
                     try {
@@ -23,12 +23,18 @@ pipeline {
             }
         }
 
-        stage('Unit Test') {
+        stage("Unit Test: ${params.BUILD_TOOL}") {
             steps {
                 script {
                     try {
                         decisionWrapper('Unit Test') {
-                            gradleUnitTest()
+                            if(params.BUILD_TOOL == 'MAVEN') {
+                                mavenUnitTest()
+                            } else if(params.BUILD_TOOL == 'GRADLE') {
+                                gradleUnitTest()
+                            } else if(params.BUILD_TOOL == 'NPM') {
+                                npmUnitTest()
+                            }
                         }
                     } catch(Exception e) {
                         error "Unit Test stage failed with error: ${e.message}"
@@ -37,12 +43,18 @@ pipeline {
             }
         }
 
-        stage('Integration Test') {
+        stage("Integration Test: ${params.BUILD_TOOL}") {
             steps {
                 script {
                     try {
                         decisionWrapper('Integration Test') {
-                            gradleIntegrationTest()
+                            if(params.BUILD_TOOL == 'MAVEN') {
+                                mavenIntegrationTest()
+                            } else if(params.BUILD_TOOL == 'GRADLE') {
+                                gradleIntegrationTest()
+                            } else if(params.BUILD_TOOL == 'NPM') {
+                                npmIntegrationTest()
+                            }
                         }
                     } catch(Exception e) {
                         error "Integration Test stage failed with error: ${e.message}"
@@ -51,7 +63,7 @@ pipeline {
             }
         }
 
-        stage('Decision: Helm Lint') {
+        stage("Decision: Helm Lint") {
             steps {
                 script {
                     try {
@@ -65,7 +77,7 @@ pipeline {
             }
         }
 
-        stage('Build Image') {
+        stage("Build Image: ${params.BUILD_TOOL}") {
             steps {
                 script {
                     try {
@@ -91,7 +103,7 @@ pipeline {
             }
         }
 
-        stage('Veracode Scan') {
+        stage("Veracode Scan") {
             steps {
                 script {
                     try {
@@ -105,7 +117,7 @@ pipeline {
             }
         }
 
-        stage('Push to Artifactory') {
+        stage("Push to Artifactory") {
             steps {
                 script {
                     try {
@@ -117,7 +129,7 @@ pipeline {
             }
         }
 
-        stage('Cleanup Workspace') {
+        stage("Cleanup Workspace") {
             steps {
                 script {
                     try {
