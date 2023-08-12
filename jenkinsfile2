@@ -6,12 +6,6 @@ pipeline {
     environment {
         IMAGE_NAME = '' // Placeholder for dynamic image name
     }
-
-        // Set the display name for the entire build/run
-    script {
-        currentBuild.displayName = "${env.GIT_BRANCH}-${env.GIT_COMMIT.substring(0,4)}"
-    }
-
     stages {
         stage('Checkout Source') {
             steps {
