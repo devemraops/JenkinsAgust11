@@ -17,6 +17,7 @@ pipeline {
             steps {
                 script {
                     try {
+                      setJobDisplayName() // Calling the shared library function
                         checkoutScm()
                     } catch(Exception e) {
                         error "Failed during Checkout Source stage: ${e.message}"
