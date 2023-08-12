@@ -2,7 +2,7 @@
 
 properties([
     parameters([
-        string(defaultValue: 'DefaultOrganizationName', description: 'GitHub Organization Name', name: 'ORG_NAME')
+        string(defaultValue: 'DefaultOrganizationName', description: 'GitHub Organization Name', name: 'ORG_NAME'),
         string(defaultValue: 'RepoName', description: 'GitHub Organization Name', name: 'REPO_NAME')
     ])
 ])
