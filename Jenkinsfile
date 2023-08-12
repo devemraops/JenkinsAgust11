@@ -1,34 +1,67 @@
-@Library('shared-libraries2') _
-
-properties([
-    parameters([
-        string(defaultValue: 'DefaultOrganizationName', description: 'GitHub Organization Name', name: 'ORG_NAME'),
-        string(defaultValue: 'RepoName', description: 'GitHub Organization Name', name: 'REPO_NAME')
-    ])
-])
-
 pipeline {
     agent any
 
     environment {
-        REPO = ''
+        ORG_NAME = ''
+        REPO_NAME = ''
         BRANCH = ''
     }
 
     stages {
-        stage('Checkout and Build') {
+        stage('Setup') {
             steps {
                 script {
-                    env.REPO = chooseRepo(github, params.ORG_NAME)
-                    env.BRANCH = chooseBranch(github, env.REPO, params.ORG_NAME)
-
-                    checkout([$class: 'GitSCM', branches: [[name: env.BRANCH]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/${params.ORG_NAME}/${env.REPO}.git"]]])
-                
-                    // Your build steps go here, e.g.
-                    // sh './gradlew build'
+                    withCredentials([string(credentialsId: 'githubPersonalToken', variable: 'GITHUB_TOKEN')]) {
+                        env.ORG_NAME = selectOrganization(GITHUB_TOKEN)
+                        env.REPO_NAME = selectRepo(GITHUB_TOKEN, env.ORG_NAME)
+                        env.BRANCH = selectBranch(GITHUB_TOKEN, env.ORG_NAME, env.REPO_NAME)
+                    }
                 }
+            }
+        }
+
+        stage('Checkout and Build') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: env.BRANCH]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/${env.ORG_NAME}/${env.REPO_NAME}.git"]]])
+                
+                // Your build steps go here, e.g.
+                // sh './gradlew build'
             }
         }
     }
 }
+
+def selectOrganization(githubToken) {
+    def apiUrl = "https://api.github.com/user/orgs"
+    def response = sh(script: "curl -s -H 'Authorization: token ${githubToken}' '${apiUrl}'", returnStdout: true).trim()
+
+    def jsonSlurper = new JsonSlurper()
+    def orgs = jsonSlurper.parseText(response)
+
+    def choices = orgs.collect { org -> "${org.login}" }
+    return input(message: 'Please choose an organization:', parameters: [choice(name: 'ORG_CHOICE', choices: choices, description: 'Pick your organization')])
+}
+
+def selectRepo(githubToken, orgName) {
+    def apiUrl = "https://api.github.com/orgs/${orgName}/repos"
+    def response = sh(script: "curl -s -H 'Authorization: token ${githubToken}' '${apiUrl}'", returnStdout: true).trim()
+
+    def jsonSlurper = new JsonSlurper()
+    def repos = jsonSlurper.parseText(response)
+
+    def choices = repos.collect { repo -> "${repo.name}" }
+    return input(message: 'Please choose a repo:', parameters: [choice(name: 'REPO_CHOICE', choices: choices, description: 'Pick your repo')])
+}
+
+def selectBranch(githubToken, orgName, repo) {
+    def apiUrl = "https://api.github.com/repos/${orgName}/${repo}/branches"
+    def response = sh(script: "curl -s -H 'Authorization: token ${githubToken}' '${apiUrl}'", returnStdout: true).trim()
+
+    def jsonSlurper = new JsonSlurper()
+    def branches = jsonSlurper.parseText(response)
+
+    def choices = branches.collect { branch -> "${branch.name}" }
+    return input(message: 'Please choose a branch:', parameters: [choice(name: 'BRANCH_CHOICE', choices: choices, description: 'Pick your branch')])
+}
+
 
