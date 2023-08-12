@@ -1,4 +1,4 @@
-@Library('my-shared-library') _
+@Library('shared-libraries2') _
 
 properties([
     parameters([
