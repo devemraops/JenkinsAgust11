@@ -3,6 +3,7 @@
 properties([
     parameters([
         string(defaultValue: 'DefaultOrganizationName', description: 'GitHub Organization Name', name: 'ORG_NAME')
+        string(defaultValue: 'RepoName', description: 'GitHub Organization Name', name: 'REPO_NAME')
     ])
 ])
 
@@ -18,8 +19,8 @@ pipeline {
         stage('Checkout and Build') {
             steps {
                 script {
-                    env.REPO = chooseRepo(GITHUB_TOKEN, params.ORG_NAME)
-                    env.BRANCH = chooseBranch(GITHUB_TOKEN, env.REPO, params.ORG_NAME)
+                    env.REPO = chooseRepo(github, params.ORG_NAME)
+                    env.BRANCH = chooseBranch(github, env.REPO, params.ORG_NAME)
 
                     checkout([$class: 'GitSCM', branches: [[name: env.BRANCH]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/${params.ORG_NAME}/${env.REPO}.git"]]])
                 
