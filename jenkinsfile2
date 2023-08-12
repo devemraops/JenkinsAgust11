@@ -5,6 +5,8 @@ pipeline {
 
     environment {
         IMAGE_NAME = '' // Placeholder for dynamic image name
+        UNIT_TEST_STAGE_NAME = "${params.BUILD_TOOL} - Unit Test"
+        INTEGRATION_TEST_STAGE_NAME = "${params.BUILD_TOOL} - Integration Test"
     }
     parameters {
         choice(name: 'BUILD_TOOL', choices: ['MAVEN', 'GRADLE', 'NPM'], description: 'Select the build tool for the application')
@@ -22,7 +24,7 @@ pipeline {
                 }
             }
         }
-        stage("${params.BUILD_TOOL}: Unit Test") {
+        stage(env.UNIT_TEST_STAGE_NAME) {
             steps {
                 script {
                     try {
@@ -42,7 +44,7 @@ pipeline {
             }
         }
 
-        stage("${params.BUILD_TOOL}: Integration Test") {
+        stage(env.UNIT_TEST_STAGE_NAME) {
             steps {
                 script {
                     try {
@@ -76,7 +78,7 @@ pipeline {
             }
         }
 
-        stage("${params.BUILD_TOOL}: Build Image") {
+        stage(env.UNIT_TEST_STAGE_NAME) {
             steps {
                 script {
                     try {
