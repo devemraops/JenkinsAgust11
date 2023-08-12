@@ -1,29 +1,17 @@
-pipeline {
-    agent any
-    tools {
-        jdk 'Java17'
-        maven 'mvn3'
+pipeline 
+{ 
+    agent any parameters
+    { 
+        gitParameter branchFilter: 'origin/(.*)', defaultValue: 'master', name: 'BRANCH', type: 'PT_BRANCH' 
     }
-    stages {
-        // stage('Cleanup Workspace') {
-        //     steps {
-        //         checkout scm()
-        //     }
-        // }
-        stage('Build App') {
-            steps {
-                sh "mvn clean package"
-            }
-        }
-        stage("Test Application") {
-            steps {
-                sh "mvn test package"
-            }
-        }
-        stage('Cleanup Workspace') {
-            steps {
-                cleanWs()
-            }
-        }
-    }
+    stages 
+    { 
+       stage("list all branches") 
+       { 
+           steps 
+           { 
+                git branch: "${params.BRANCH}", credentialsId: "SSH_user_name_with_private_key", url: "ssh://git@myCompanyBitBucketSite.com:port/myRepository.git" 
+           } 
+      } 
+   } 
 }
