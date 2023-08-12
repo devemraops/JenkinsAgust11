@@ -6,6 +6,9 @@ pipeline {
     environment {
         IMAGE_NAME = '' // Placeholder for dynamic image name
     }
+    parameters {
+        choice(name: 'BUILD_TOOL', choices: ['MAVEN', 'GRADLE', 'NPM'], description: 'Select the build tool for the application')
+    }
     stages {
         stage('Checkout Source') {
             steps {
