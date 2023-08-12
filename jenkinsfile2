@@ -22,7 +22,7 @@ pipeline {
                 }
             }
         }
-        stage('Unit Test: ${params.BUILD_TOOL}') {
+        stage("${params.BUILD_TOOL}: Unit Test") {
             steps {
                 script {
                     try {
@@ -42,7 +42,7 @@ pipeline {
             }
         }
 
-        stage('Integration Test: ${params.BUILD_TOOL}') {
+        stage("${params.BUILD_TOOL}: Integration Test") {
             steps {
                 script {
                     try {
@@ -76,7 +76,7 @@ pipeline {
             }
         }
 
-        stage('Build Image: ${params.BUILD_TOOL}') {
+        stage("${params.BUILD_TOOL}: Build Image") {
             steps {
                 script {
                     try {
