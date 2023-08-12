@@ -10,100 +10,118 @@ pipeline {
     stages {
         stage('Checkout Source') {
             steps {
-              try {
-                checkoutScm() // This is the default command to checkout the source from the associated SCM. Typically, it's the Git repository that's connected to the Jenkins job.
-              }  catch(Exception e) {
-                error "Checkout fail"
-              }
+                script {
+                    try {
+                        checkoutSource()
+                    } catch(Exception e) {
+                        error "Failed during Checkout Source stage: ${e.message}"
+                    }
+                }
             }
         }
+
         stage('Unit Test') {
             steps {
-                try {
-                    decisionWrapper('Unit Test') {
-                        gradleUnitTest()
+                script {
+                    try {
+                        decisionWrapper('Unit Test') {
+                            gradleUnitTest()
+                        }
+                    } catch(Exception e) {
+                        error "Unit Test stage failed with error: ${e.message}"
                     }
-                } catch(Exception e) {
-                    error "Unit Test stage failed with error: ${e.message}"
                 }
             }
         }
 
         stage('Integration Test') {
             steps {
-                try {
-                    decisionWrapper('Integration Test') {
-                        gradleIntegrationTest()
+                script {
+                    try {
+                        decisionWrapper('Integration Test') {
+                            gradleIntegrationTest()
+                        }
+                    } catch(Exception e) {
+                        error "Integration Test stage failed with error: ${e.message}"
                     }
-                } catch(Exception e) {
-                    error "Integration Test stage failed with error: ${e.message}"
                 }
             }
         }
 
         stage('Decision: Helm Lint') {
             steps {
-                try {
-                    decisionWrapper('Helm Lint') {
-                        runHelmLint()  // Call the new shared library method
+                script {
+                    try {
+                        decisionWrapper('Helm Lint') {
+                            runHelmLint()
+                        }
+                    } catch(Exception e) {
+                        error "Helm Lint stage failed with error: ${e.message}"
                     }
-                } catch(Exception e) {
-                    error "Helm Lint stage failed with error: ${e.message}"
                 }
             }
         }
 
         stage('Build Image') {
             steps {
-                try {
-                    script {
+                script {
+                    try {
                         env.IMAGE_NAME = buildImage()
+                    } catch(Exception e) {
+                        error "Build Image stage failed with error: ${e.message}"
                     }
-                } catch(Exception e) {
-                    error "Build Image stage failed with error: ${e.message}"
                 }
             }
         }
 
         stage('Blackduck Scan') {
             steps {
-                try {
-                    decisionWrapper('Blackduck Scan') {
-                        blackduckScan('.')
+                script {
+                    try {
+                        decisionWrapper('Blackduck Scan') {
+                            blackduckScan('.')
+                        }
+                    } catch(Exception e) {
+                        error "Blackduck Scan stage failed with error: ${e.message}"
                     }
-                } catch(Exception e) {
-                    error "Blackduck Scan stage failed with error: ${e.message}"
                 }
             }
         }
 
         stage('Veracode Scan') {
             steps {
-                try {
-                    decisionWrapper('Veracode Scan') {
-                        veracodeScan('.')
+                script {
+                    try {
+                        decisionWrapper('Veracode Scan') {
+                            veracodeScan('.')
+                        }
+                    } catch(Exception e) {
+                        error "Veracode Scan stage failed with error: ${e.message}"
                     }
-                } catch(Exception e) {
-                    error "Veracode Scan stage failed with error: ${e.message}"
                 }
             }
         }
 
         stage('Push to Artifactory') {
             steps {
-                try {
-                    pushToArtifactory(env.IMAGE_NAME, 'http://my.artifactory.url')
-                } catch(Exception e) {
-                    error "Push to Artifactory stage failed with error: ${e.message}"
+                script {
+                    try {
+                        pushToArtifactory(env.IMAGE_NAME, 'http://my.artifactory.url')
+                    } catch(Exception e) {
+                        error "Push to Artifactory stage failed with error: ${e.message}"
+                    }
                 }
             }
         }
+
         stage('Cleanup Workspace') {
             steps {
-                try {
-                    cleanupWorkspace()
-                } catch(Exception e) {
-                    error "Workspace cleanup failed with error: ${e.message}"
+                script {
+                    try {
+                        cleanupWorkspace()
+                    } catch(Exception e) {
+                        error "Workspace cleanup failed with error: ${e.message}"
+                    }
                 }
             }
         }
